@@ -73,7 +73,8 @@ const AutoComplete:React.FC = () => {
         filteredListRef.current = countriesDials.filter(
             item => item.name.toLowerCase().includes(valueRef.current.toLowerCase().trim())
         )
-        focusStateRef.current = FocusState.BLUR
+        focusStateRef.current = FocusState.BLUR;
+        inputRef.current?.blur()
         updateDom()
     }
 
