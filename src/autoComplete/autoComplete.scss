@@ -1,0 +1,93 @@
+
+
+.autoCompleteMainContainer {
+  width: 100%;
+  max-width: min(80vw, 300px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  input {
+    width: 100%;
+    border: 1px solid #b7b7b7;
+    padding: 10px;
+    font-size: 18px;
+
+    &:focus-visible {
+      outline: none;
+    }
+  }
+
+
+  .list {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    border: 1px solid #b7b7b7;
+    width: 100%;
+    height: 20vh;
+    overflow-y: auto;
+
+    &.true {
+      display: unset;
+    }
+
+    /* width */
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    /* Track */
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    /* Handle */
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+    }
+
+    /* Handle on hover */
+    &::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    .listItem {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      position: relative;
+      padding: 5px;
+      gap: 10px;
+      cursor: pointer;
+
+      &.true {
+        background-color: #b7b7b7;
+      }
+
+      img {
+        width: 30px;
+        height: 30px;
+        object-fit: cover;
+      }
+
+      span {
+        font-size: 18px;
+      }
+
+      &:after {
+        content: "";
+        display: block;
+        position: absolute;
+        width: 100%;
+        height: 1px;
+        background-color: #b7b7b7;
+        bottom: 0;
+        left: 0;
+      }
+    }
+  }
+}
