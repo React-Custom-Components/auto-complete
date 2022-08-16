@@ -16,32 +16,38 @@ const AutoComplete:React.FC = () => {
     const selectedItemRef = useRef<CountryInterface | undefined>(undefined)
     const hoveredOptionIdRef = useRef<string>("")
     const valueRef = useRef<string>("")
+    const inputRef = useRef<HTMLInputElement>(null)
+    const listRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        const inputRef = document.getElementById("UNIQUE_ID")
-
-        if (inputRef) {
-            inputRef.addEventListener("focus", onFocusOrBlur)
-            inputRef.addEventListener("blur", onFocusOrBlur)
-        }
-
-        return () => {
-            if (inputRef) {
-                inputRef.removeEventListener("focus", onFocusOrBlur)
-                inputRef.removeEventListener("blur", onFocusOrBlur)
+        const checkClick = (event: MouseEvent) => {
+            if(listRef.current && inputRef.current) {
+                if(inputRef.current.contains(event.target as Node)) {
+                    onFocusOrBlur(FocusState.FOCUS)
+                } else if (!listRef.current.contains(event.target as Node)) {
+                    onFocusOrBlur(FocusState.BLUR)
+                }
             }
         }
 
+        document.addEventListener("click", checkClick)
+
+        return () => {
+            document.removeEventListener("click", checkClick)
+        }
     }, [])
 
-    const onFocusOrBlur = (event: FocusEvent) => {
-        focusStateRef.current = event.type === "focus" ? FocusState.FOCUS : FocusState.BLUR;
+    const onFocusOrBlur = (event: FocusState) => {
+        focusStateRef.current = event;
         configureList();
     }
 
     const configureList = () => {
         if (focusStateRef.current === FocusState.FOCUS) {
             document.addEventListener('keydown', initKeyboardListeners)
+            filteredListRef.current = countriesDials.filter(
+                item => item.name.toLowerCase().includes(valueRef.current.toLowerCase().trim())
+            )
         } else {
             document.removeEventListener('keydown', initKeyboardListeners)
             filteredListRef.current = [...countriesDials]
@@ -54,13 +60,20 @@ const AutoComplete:React.FC = () => {
         filteredListRef.current = countriesDials.filter(
             item => item.name.toLowerCase().includes(event.target.value.toLowerCase().trim())
         )
-        valueRef.current = event.target.value
+        valueRef.current = event.target.value.trim()
+        if (valueRef.current === "") {
+            hoveredOptionIdRef.current = ""
+        }
         updateDom()
     }
 
     const selectedCountry = (item: CountryInterface) => {
         selectedItemRef.current = item;
         valueRef.current = selectedItemRef.current?.name || ""
+        filteredListRef.current = countriesDials.filter(
+            item => item.name.toLowerCase().includes(valueRef.current.toLowerCase().trim())
+        )
+        focusStateRef.current = FocusState.BLUR
         updateDom()
     }
 
@@ -70,8 +83,6 @@ const AutoComplete:React.FC = () => {
     }
 
     const initKeyboardListeners = (event: KeyboardEvent) => {
-        // event.preventDefault();
-        // event.stopPropagation();
         switch (event.key) {
             case "ArrowUp":
                 changeHoveredItem(-1)
@@ -80,9 +91,7 @@ const AutoComplete:React.FC = () => {
                 changeHoveredItem(1)
                 break;
             case "Enter":
-                selectedItemRef.current = countriesDials.find(item => item.isoCode === hoveredOptionIdRef.current)
-                valueRef.current = selectedItemRef.current?.name || "";
-                updateDom()
+                selectedCountry(countriesDials.find(item => item.isoCode === hoveredOptionIdRef.current) as CountryInterface)
                 break;
             default:
                 break;
@@ -114,12 +123,12 @@ const AutoComplete:React.FC = () => {
     return (
         <div className={"autoCompleteMainContainer"}>
             <input
-                id={"UNIQUE_ID"}
+                ref={inputRef}
                 onChange={onChange}
                 value={state.value}
                 placeholder={"Enter your country"}
             />
-            <div className={`list ${state.focusState === FocusState.FOCUS}`}>
+            <div ref={listRef} className={`list ${state.focusState === FocusState.FOCUS}`}>
                 {
                     state.filteredList.map((item, index) => (
                         <div
